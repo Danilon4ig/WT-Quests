@@ -23,7 +23,7 @@ public class TreasureBoxMenu extends AbstractContainerMenu {
     }
 
     public TreasureBoxMenu(int containderId, Inventory inv, BlockEntity entity, ContainerData data) {
-        super(ModMenuTypes.TREASURE_BOX_MENU.get(), containderId); // TODO: DO THIS!!!
+        super(ModMenuTypes.TREASURE_BOX_MENU.get(), containderId);
         checkContainerSize(inv, 9);
         blockEntity = ((TreasureBoxBlockEntity) entity);
         this.level = inv.player.level();

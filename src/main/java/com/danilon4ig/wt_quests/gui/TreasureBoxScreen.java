@@ -13,7 +13,7 @@ import static com.danilon4ig.wt_quests.Wt_quests.MODID;
 
 public class TreasureBoxScreen extends AbstractContainerScreen<TreasureBoxMenu> {
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(MODID, "texture/gui/treasure_gui.png");
+            new ResourceLocation(MODID, "textures/gui/treasure_gui.png");
 
     public TreasureBoxScreen(TreasureBoxMenu menu, Inventory inventory, Component component) {
         super(menu, inventory, component);
@@ -22,9 +22,9 @@ public class TreasureBoxScreen extends AbstractContainerScreen<TreasureBoxMenu> 
     @Override
     protected void init() {
         super.init();
-        this.titleLabelX = 65;
-        this.titleLabelY = 10;
-        this.inventoryLabelY = 150;
+        this.titleLabelX = 60;
+        this.titleLabelY = 7;
+        this.inventoryLabelY = 75;
     }
 
     @Override

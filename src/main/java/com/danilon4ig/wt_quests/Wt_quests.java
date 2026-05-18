@@ -32,6 +32,7 @@ public class Wt_quests {
         ModBlockEntities.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(Wt_quests::onClientSetup);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
