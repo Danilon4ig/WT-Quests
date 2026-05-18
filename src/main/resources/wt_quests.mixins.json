@@ -1,9 +1,12 @@
 {
-  "required": true,
+  "required": false,
   "minVersion": "0.8",
   "package": "com.danilon4ig.wt_quests.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "wt_quests.refmap.json",
+  "client": [
+    "DummyMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
