@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "wt_quests:block/starter_treasure"
+    }
+  }
+}
