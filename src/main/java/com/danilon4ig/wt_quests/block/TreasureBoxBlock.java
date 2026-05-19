@@ -3,10 +3,12 @@ package com.danilon4ig.wt_quests.block;
 import com.danilon4ig.wt_quests.block.entity.ModBlockEntities;
 import com.danilon4ig.wt_quests.block.entity.TreasureBoxBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -45,8 +47,12 @@ public class TreasureBoxBlock extends BaseEntityBlock {
     public @NotNull InteractionResult use(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand interactionHand, @NotNull BlockHitResult result) {
         if (!level.isClientSide()) {
             BlockEntity entity = level.getBlockEntity(pos);
-            if (entity instanceof TreasureBoxBlockEntity) {
-                NetworkHooks.openScreen(((ServerPlayer)player), (TreasureBoxBlockEntity)entity, pos);
+            if (entity instanceof TreasureBoxBlockEntity box) {
+                if (!box.isOwner(player)) {
+                    player.displayClientMessage(Component.translatable("block.wt_quests.starter_treasure.not_owner"), true);
+                    return InteractionResult.FAIL;
+                }
+                NetworkHooks.openScreen(((ServerPlayer)player), box, pos);
             } else {
               throw new IllegalStateException("Container provider is missing!");
             }
@@ -56,14 +62,24 @@ public class TreasureBoxBlock extends BaseEntityBlock {
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> entityType) {
-        if (level.isClientSide()) return null;
-        return createTickerHelper(entityType, ModBlockEntities.TREASURE_BOX_BE.get(), (level1, pos, state1, blockEntity) -> blockEntity.tick(level1, pos, state1));
+    public boolean canHarvestBlock(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull Player player) {
+        return false;
+    }
+
+    @Override
+    public float getExplosionResistance() {
+        return Float.MAX_VALUE;
     }
 
     @Nullable
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
         return new TreasureBoxBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> type) {
+        return createTickerHelper(type, ModBlockEntities.TREASURE_BOX_BE.get(), TreasureBoxBlockEntity::tick);
     }
 }

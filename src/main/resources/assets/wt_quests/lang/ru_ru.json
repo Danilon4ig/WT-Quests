@@ -1,0 +1,8 @@
+{
+  "language": "ru_ru",
+  "block.wt_quests.starter_treasure": "Стартовый клад",
+  "block.wt_quests.starter_treasure.not_owner": "Это не ваш клад!",
+  "item.wt_quests.treasure_map": "Карта клада",
+  "item.wt_quests.stranger_amulet": "Амулет странника",
+  "gui.wt_quests.starter_treasue_title": "Клад"
+}

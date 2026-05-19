@@ -9,6 +9,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,9 +23,22 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Wt_quests.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class QuestCommand {
+
+    private static final Map<UUID, BlockPos> ACTIVE_CHESTS = new HashMap<>();
+
+    public static void markChestActive(UUID playerUuid, BlockPos pos) {
+        ACTIVE_CHESTS.put(playerUuid, pos);
+    }
+
+    public static void markChestLooted(UUID playerUuid) {
+        ACTIVE_CHESTS.remove(playerUuid);
+    }
 
     private static final DynamicCommandExceptionType INVALID_CHEST = new DynamicCommandExceptionType(
             id -> Component.literal("Invalid chest type: " + id));
@@ -42,6 +56,7 @@ public class QuestCommand {
                                                     builder.suggest("barrel");
                                                     builder.suggest("trapped_chest");
                                                     builder.suggest("shulker_box");
+                                                    builder.suggest("wt_quests:starter_treasure");
                                                     return builder.buildFuture();
                                                 })
                                                 .then(Commands.argument("contents", CompoundTagArgument.compoundTag())
@@ -73,11 +88,19 @@ public class QuestCommand {
         ServerLevel level = source.getLevel();
 
         for (ServerPlayer target : targets) {
-            ItemStack map = QuestApi.spawnChestQuest(level, target.blockPosition(), block, contents);
+            if (hasActiveChest(target)) {
+                source.sendFailure(Component.literal(target.getName().getString() + " already has an active treasure chest!"));
+                continue;
+            }
+            ItemStack map = QuestApi.spawnChestQuest(level, target.blockPosition(), block, contents, target.getUUID());
             target.getInventory().add(map);
         }
 
         source.sendSuccess(() -> Component.literal("Chest spawned for " + targets.size() + " player(s). Treasure map added."), true);
         return targets.size();
+    }
+
+    private static boolean hasActiveChest(ServerPlayer player) {
+        return ACTIVE_CHESTS.containsKey(player.getUUID());
     }
 }

@@ -1,5 +1,8 @@
 {
   "language": "en_us",
   "block.wt_quests.starter_treasure": "Starter Treasure Box",
-  "container.starter_treasure": "Starter Treasure"
+  "block.wt_quests.starter_treasure.not_owner": "This is not your treasure!",
+  "item.wt_quests.treasure_map": "Treasure map",
+  "item.wt_quests.stranger_amulet": "Stranger`s amulet",
+  "gui.wt_quests.starter_treasue_title": "Treasure"
 }

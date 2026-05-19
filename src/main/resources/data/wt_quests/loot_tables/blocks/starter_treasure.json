@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:block",
+    "conditions": [
+      {
+        "condition": "minecraft:survives_explosion"
+      }
+    ]
+}

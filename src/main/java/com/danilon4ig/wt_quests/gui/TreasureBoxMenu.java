@@ -12,11 +12,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class TreasureBoxMenu extends AbstractContainerMenu {
     public final TreasureBoxBlockEntity blockEntity;
     private final Level level;
-    private final ContainerData containerData;
 
     public TreasureBoxMenu(int containerId, Inventory inv, FriendlyByteBuf buf) {
         this(containerId, inv, inv.player.level().getBlockEntity(buf.readBlockPos()), new SimpleContainerData(9));
@@ -27,14 +27,21 @@ public class TreasureBoxMenu extends AbstractContainerMenu {
         checkContainerSize(inv, 9);
         blockEntity = ((TreasureBoxBlockEntity) entity);
         this.level = inv.player.level();
-        containerData = data;
 
         addPlayerInventory(inv);
         addPlayerHotbar(inv);
 
         this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(iItemHandler -> {
-            this.addSlot(new SlotItemHandler(iItemHandler, 0, 80, 11));
-            this.addSlot(new SlotItemHandler(iItemHandler, 1, 80, 59));
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    this.addSlot(new SlotItemHandler(iItemHandler, row * 3 + col, 62 + col * 18, 45 + row * 18) {
+                        @Override
+                        public boolean mayPlace(@NotNull ItemStack stack) {
+                            return false;
+                        }
+                    });
+                }
+            }
         });
 
         addDataSlots(data);
@@ -48,7 +55,7 @@ public class TreasureBoxMenu extends AbstractContainerMenu {
     private static final int VANILLA_FIRST_SLOT_INDEX = 0;
     private static final int TE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
 
-    private static final int TE_INVENTORY_SLOT_COUNT = 9;  // must be the number of slots you have!
+    private static final int TE_INVENTORY_SLOT_COUNT = 9;
     @Override
     public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int pIndex) {
         Slot sourceSlot = slots.get(pIndex);
@@ -90,14 +97,14 @@ public class TreasureBoxMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory inv) {
         for (int i = 0; i < 3; ++i) {
             for (int j = 0;  j < 9; ++j) {
-                this.addSlot(new Slot(inv, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlot(new Slot(inv, j + i * 9 + 9, 8 + j * 18, 132 + i * 18));
             }
         }
     }
 
     private void addPlayerHotbar(Inventory inv) {
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(inv, i, 8 + i * 18, 142));
+            this.addSlot(new Slot(inv, i, 8 + i * 18, 190));
         }
     }
 }

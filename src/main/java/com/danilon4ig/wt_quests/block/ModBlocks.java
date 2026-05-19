@@ -3,7 +3,6 @@ package com.danilon4ig.wt_quests.block;
 import com.danilon4ig.wt_quests.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -25,7 +24,7 @@ public class ModBlocks {
     }
 
     public static final RegistryObject<Block> TREASURE_BOX_BLOCK = registerBlock("starter_treasure",
-            () -> new TreasureBoxBlock(BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK).noOcclusion()));
+            () -> new TreasureBoxBlock(BlockBehaviour.Properties.of().noOcclusion().strength(-1.0F, 3600000.0F)));
 
     private static <T extends Block> void registerBlockItem(String name, RegistryObject<T> block) {
         ModItems.ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));

@@ -17,14 +17,16 @@ public class TreasureBoxScreen extends AbstractContainerScreen<TreasureBoxMenu> 
 
     public TreasureBoxScreen(TreasureBoxMenu menu, Inventory inventory, Component component) {
         super(menu, inventory, component);
+        this.imageWidth = 176;
+        this.imageHeight = 256;
     }
 
     @Override
     protected void init() {
         super.init();
         this.titleLabelX = 60;
-        this.titleLabelY = 7;
-        this.inventoryLabelY = 75;
+        this.titleLabelY = 34;
+        this.inventoryLabelY = 120;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class TreasureBoxScreen extends AbstractContainerScreen<TreasureBoxMenu> 
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
 
-        graphics.blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
+        graphics.blit(TEXTURE, x, y + 27, 0, 0, imageWidth, imageHeight);
     }
 
     @Override

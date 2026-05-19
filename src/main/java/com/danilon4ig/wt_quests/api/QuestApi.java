@@ -1,6 +1,8 @@
 package com.danilon4ig.wt_quests.api;
 
 import com.danilon4ig.wt_quests.Config;
+import com.danilon4ig.wt_quests.block.entity.TreasureBoxBlockEntity;
+import com.danilon4ig.wt_quests.command.QuestCommand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +19,7 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ChunkPos;
@@ -27,6 +30,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -44,25 +48,30 @@ public class QuestApi {
     private static Object ftbManager;
     private static Constructor<?> ftbChunkDimPosCtor;
 
+    @SuppressWarnings("unused")
     public static ItemStack spawnChestQuest(ServerLevel level) {
         return spawnChestQuest(level, level.getSharedSpawnPos(), ForgeRegistries.BLOCKS.getValue(new ResourceLocation("chest")), null);
     }
 
+    @SuppressWarnings("unused")
     public static ItemStack spawnChestQuest(ServerLevel level, BlockPos referencePos) {
         return spawnChestQuest(level, referencePos, ForgeRegistries.BLOCKS.getValue(new ResourceLocation("chest")), null);
     }
 
     public static ItemStack spawnChestQuest(ServerLevel level, BlockPos referencePos, Block chestBlock, @Nullable CompoundTag contents) {
+        return spawnChestQuest(level, referencePos, chestBlock, contents, null);
+    }
+
+    public static ItemStack spawnChestQuest(ServerLevel level, BlockPos referencePos, Block chestBlock, @Nullable CompoundTag contents, @Nullable UUID owner) {
         BlockPos chestPos = findBiomePosition(level, referencePos);
         if (chestPos != null) {
             chestPos = randomizeInBiome(level, chestPos);
-            chestPos = findLand(level, chestPos);
         } else {
             chestPos = findFallbackPosition(level, referencePos);
-            chestPos = findLand(level, chestPos);
         }
 
-        placeChest(level, chestPos, chestBlock, contents);
+        chestPos = findLand(level, chestPos);
+        placeChest(level, chestPos, chestBlock, contents, owner);
         return createTreasureMap(level, chestPos);
     }
 
@@ -229,10 +238,32 @@ public class QuestApi {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private static void placeChest(ServerLevel level, BlockPos pos, Block block, @Nullable CompoundTag contents) {
+        placeChest(level, pos, block, contents, null);
+    }
+
+    private static void placeChest(ServerLevel level, BlockPos pos, Block block, @Nullable CompoundTag contents, @Nullable UUID owner) {
         level.setBlock(pos, block.defaultBlockState(), 3);
 
-        if (contents != null && level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity container) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof TreasureBoxBlockEntity box) {
+            if (owner != null) {
+                box.setOwner(owner);
+                QuestCommand.markChestActive(owner, pos);
+            }
+            if (contents != null) {
+                ListTag items = contents.getList("Items", Tag.TAG_COMPOUND);
+                for (int i = 0; i < items.size(); i++) {
+                    CompoundTag itemTag = items.getCompound(i);
+                    int slot = itemTag.getByte("Slot") & 255;
+                    ItemStack stack = ItemStack.of(itemTag);
+                    if (!stack.isEmpty() && slot < 9) {
+                        box.getItemStackHandler().setStackInSlot(slot, stack);
+                    }
+                }
+            }
+        } else if (contents != null && be instanceof RandomizableContainerBlockEntity container) {
             ListTag items = contents.getList("Items", Tag.TAG_COMPOUND);
             for (int i = 0; i < items.size(); i++) {
                 CompoundTag itemTag = items.getCompound(i);
@@ -263,7 +294,7 @@ public class QuestApi {
             }
             MapItemSavedData.addTargetDecoration(stack, pos, "+quest_" + level.getRandom().nextInt(10000), MapDecoration.Type.RED_X);
         }
-        stack.setHoverName(Component.translatable("filled_map.buried_treasure"));
+        stack.setHoverName(Component.translatable("item.wt_quests.treasure_map"));
         return stack;
     }
 }
