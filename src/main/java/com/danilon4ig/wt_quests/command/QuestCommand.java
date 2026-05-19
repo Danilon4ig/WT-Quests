@@ -2,6 +2,7 @@ package com.danilon4ig.wt_quests.command;
 
 import com.danilon4ig.wt_quests.Wt_quests;
 import com.danilon4ig.wt_quests.api.QuestApi;
+import com.danilon4ig.wt_quests.block.entity.TreasureBoxBlockEntity;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
@@ -74,6 +75,14 @@ public class QuestCommand {
                                                         null
                                                 ))
                                         )
+                        )
+                         )
+                        .then(Commands.literal("clear")
+                                .then(Commands.argument("target", EntityArgument.player())
+                                        .executes(ctx -> executeClear(
+                                                ctx.getSource(),
+                                                EntityArgument.getPlayer(ctx, "target")
+                                        ))
                                 )
                         )
         );
@@ -102,5 +111,22 @@ public class QuestCommand {
 
     private static boolean hasActiveChest(ServerPlayer player) {
         return ACTIVE_CHESTS.containsKey(player.getUUID());
+    }
+
+    private static int executeClear(CommandSourceStack source, ServerPlayer target) {
+        UUID uuid = target.getUUID();
+        BlockPos pos = ACTIVE_CHESTS.remove(uuid);
+
+        if (pos != null) {
+            for (ServerLevel serverLevel : source.getServer().getAllLevels()) {
+                if (serverLevel.getBlockEntity(pos) instanceof TreasureBoxBlockEntity box && uuid.equals(box.getOwner())) {
+                    serverLevel.removeBlock(pos, false);
+                    source.sendSuccess(() -> Component.literal("Cleared chest for " + target.getName().getString()), true);
+                    return 1;
+                }
+            }
+        }
+        source.sendSuccess(() -> Component.literal("No active chest found for " + target.getName().getString()), true);
+        return 1;
     }
 }

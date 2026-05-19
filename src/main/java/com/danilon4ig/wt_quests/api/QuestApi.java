@@ -3,6 +3,7 @@ package com.danilon4ig.wt_quests.api;
 import com.danilon4ig.wt_quests.Config;
 import com.danilon4ig.wt_quests.block.entity.TreasureBoxBlockEntity;
 import com.danilon4ig.wt_quests.command.QuestCommand;
+import com.danilon4ig.wt_quests.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -26,7 +27,11 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -262,6 +267,8 @@ public class QuestApi {
                         box.getItemStackHandler().setStackInSlot(slot, stack);
                     }
                 }
+            } else if (owner != null) {
+                fillWithLoot(level, box);
             }
         } else if (contents != null && be instanceof RandomizableContainerBlockEntity container) {
             ListTag items = contents.getList("Items", Tag.TAG_COMPOUND);
@@ -273,6 +280,23 @@ public class QuestApi {
                     container.setItem(slot, stack);
                 }
             }
+        }
+    }
+
+    private static void fillWithLoot(ServerLevel level, TreasureBoxBlockEntity box) {
+        ItemStackHandler handler = box.getItemStackHandler();
+        handler.setStackInSlot(4, new ItemStack(ModItems.STRANGER_AMULET.get(), 1));
+
+        LootTable lootTable = level.getServer().getLootData().getLootTable(
+                new ResourceLocation("wt_quests", "chests/starter_treasure"));
+        LootParams params = new LootParams.Builder(level).create(LootContextParamSets.EMPTY);
+        List<ItemStack> loot = lootTable.getRandomItems(params);
+
+        List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < 9; i++) if (i != 4) slots.add(i);
+
+        for (int i = 0; i < loot.size() && i < slots.size(); i++) {
+            handler.setStackInSlot(slots.get(i), loot.get(i));
         }
     }
 
