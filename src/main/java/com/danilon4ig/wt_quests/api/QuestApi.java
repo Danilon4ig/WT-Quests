@@ -40,6 +40,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -294,6 +295,7 @@ public class QuestApi {
 
         List<Integer> slots = new ArrayList<>();
         for (int i = 0; i < 9; i++) if (i != 4) slots.add(i);
+        Collections.shuffle(slots);
 
         for (int i = 0; i < loot.size() && i < slots.size(); i++) {
             handler.setStackInSlot(slots.get(i), loot.get(i));
